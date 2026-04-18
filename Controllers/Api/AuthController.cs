@@ -14,10 +14,9 @@ namespace DATN.Controllers.Api
         private readonly Database _database;
         private readonly Collection _userCol;
 
-        public AuthController()
+        public AuthController(Database database)
         {
-            _database = new Database("FallDetectionDB");
-            _database.Connect("DataStore");
+            _database = database;
             _userCol = _database.GetCollection("Users");
         }
 
@@ -26,14 +25,15 @@ namespace DATN.Controllers.Api
         {
             var hash = HashPassword(request.Password);
             
-            // T?m user
+            // Tìm user
             var users = _userCol.Select();
             foreach (var doc in users)
             {
                 if (doc.SelectPath("Username")?.ToString() == request.Username && 
                     doc.SelectPath("PasswordHash")?.ToString() == hash)
                 {
-                    return Ok(new { success = true, userId = doc.ObjectId, message = "Login successful" });
+                    var role = doc.SelectPath("Role")?.ToString() ?? "User";
+                    return Ok(new { success = true, userId = doc.ObjectId, role = role, message = "Login successful" });
                 }
             }
 
@@ -55,6 +55,7 @@ namespace DATN.Controllers.Api
                 ["PasswordHash"] = userModel.PasswordHash,
                 ["FullName"] = userModel.FullName,
                 ["PhoneNumber"] = userModel.PhoneNumber,
+                ["Role"] = string.IsNullOrEmpty(userModel.Role) ? "User" : userModel.Role,
             };
 
             _userCol.Insert(doc);

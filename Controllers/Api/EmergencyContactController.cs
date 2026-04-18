@@ -11,10 +11,9 @@ namespace DATN.Controllers.Api
         private readonly Database _database;
         private readonly Collection _contactCol;
 
-        public EmergencyContactController()
+        public EmergencyContactController(Database database)
         {
-            _database = new Database("FallDetectionDB");
-            _database.Connect("DataStore");
+            _database = database;
             _contactCol = _database.GetCollection("EmergencyContacts");
         }
 

@@ -8,6 +8,12 @@
     <PackageReference Include="MongoDB.Driver" Version="3.7.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="DATN.App\Views\LoginPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>

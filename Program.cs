@@ -1,3 +1,5 @@
+using DATN.Services;
+
 namespace DATN
 {
     public class Program
@@ -6,8 +8,34 @@ namespace DATN
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            var db = new BsonData.Database("FallDetectionDB");
+            db.Connect("DataStore");
+            builder.Services.AddSingleton(db);
+
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            
+            // SignalR for real-time notifications
+            builder.Services.AddSignalR();
+
+            // Register Core Services
+            builder.Services.AddSingleton<FallDetectionService>();
+            builder.Services.AddSingleton<NotificationService>();
+            
+            // Add Hosted Service for MQTT Background Worker
+            builder.Services.AddHostedService<MqttBackgroundService>();
+
+            // CORS policy for mobile app + SignalR compatibility
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.SetIsOriginAllowed(_ => true)  // Allow all origins (dev)
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();  // Required for SignalR WebSocket
+                });
+            });
 
             var app = builder.Build();
 
@@ -15,7 +43,6 @@ namespace DATN
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -23,12 +50,16 @@ namespace DATN
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseCors();
 
             app.UseAuthorization();
 
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            // Map SignalR Hub endpoint
+            app.MapHub<NotificationHub>("/hubs/notification");
 
             app.Run();
         }

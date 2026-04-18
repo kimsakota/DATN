@@ -16,8 +16,12 @@ namespace DATN.Models
         public string PhoneNumber { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
 
+        // Role: "User" (default) or "Hospital"
+        public string Role { get; set; } = "User";
+
         // Settings
         public bool AutoEmergencyEnabled { get; set; } = true;
+        public int CountdownSeconds { get; set; } = 30; // Delay before auto-dispatch
         
         public List<EmergencyContact> EmergencyContacts { get; set; } = new();
     }

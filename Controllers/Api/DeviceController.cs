@@ -11,10 +11,9 @@ namespace DATN.Controllers.Api
         private readonly Database _database;
         private readonly Collection _deviceCol;
 
-        public DeviceController()
+        public DeviceController(Database database)
         {
-            _database = new Database("FallDetectionDB");
-            _database.Connect("DataStore");
+            _database = database;
             _deviceCol = _database.GetCollection("Devices");
         }
 
